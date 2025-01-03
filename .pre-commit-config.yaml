@@ -1,0 +1,24 @@
+repos:
+  - repo: local
+    hooks:
+      - id: gofmt
+        name: go fmt
+        entry: gofmt -l
+        language: system
+        files: \.go$
+        pass_filenames: true
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: no-commit-to-branch
+        args: [ --branch, main ]
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+
+  - repo: https://github.com/compilerla/conventional-pre-commit
+    rev: v4.0.0
+    hooks:
+      - id: conventional-pre-commit
+        stages: [commit-msg]
+        args: [--strict, --force-scope]
