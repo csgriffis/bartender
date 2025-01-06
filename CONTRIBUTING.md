@@ -2,9 +2,6 @@
 
 We welcome contributions! Here's how you can help:
 
-## Code of Conduct
-Please adhere to our [Code of Conduct](CODE_OF_CONDUCT.md).
-
 ## How to Contribute
 1. Fork the repository.
 2. Create a new branch for your feature or bugfix.
@@ -19,4 +16,5 @@ Please adhere to our [Code of Conduct](CODE_OF_CONDUCT.md).
 ## Testing
 Run the following to ensure all tests pass:
 ```bash
-make test
+go test ./...
+```
