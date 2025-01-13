@@ -33,46 +33,50 @@ func (c TimeBarConfig) Process(trades <-chan Trade) chan *Bar {
 		for trade := range trades {
 			alignedStart := calculateAlignedStart(trade.Time, c.interval)
 
-			// check if a new bar should be started
-			if current == nil || trade.Time.Sub(current.Start.Add(c.interval)).Nanoseconds() >= 0 || trade.Time.Before(current.Start) {
-				// if there is an existing bar, finalize it
-				finalizedBar := current
+			// is the trade before the aligned start?
+			if trade.Time.Before(alignedStart) {
+				// then drop the trade
+				continue
+			}
 
-				// start a new bar only if the trade falls on or after the aligned start
-				if trade.Time.Before(alignedStart) {
-					// skip trades before the first aligned start
-					output <- finalizedBar
-					continue
+			// is the trade beyond the current interval?
+			if current != nil && trade.Time.Sub(current.Start.Add(c.interval)).Nanoseconds() >= 0 {
+				// then finalize the current interval
+				output <- current
+
+				// is there a gap between the current interval and the trade?
+				for nextStart := alignedStart.Add(c.interval); current.Start.Add(c.interval).Before(alignedStart); nextStart = nextStart.Add(c.interval) {
+					emptyBar := &Bar{
+						Open:  current.Close,
+						High:  current.Close,
+						Low:   current.Close,
+						Close: current.Close,
+						Start: current.Start.Add(c.interval),
+					}
+					output <- emptyBar
+
+					current = emptyBar
 				}
 
 				// start a new bar
 				newBar := &Bar{
-					Open:   trade.Price,
-					High:   trade.Price,
-					Low:    trade.Price,
-					Close:  trade.Price,
-					Volume: trade.Size,
-					Start:  trade.Time,
-				}
-
-				output <- finalizedBar
-
-				// Handle missing intervals between the current bar and the new trade
-				if current != nil && trade.Time.Sub(current.Start.Add(c.interval)).Nanoseconds() >= 0 {
-					for nextStart := current.Start.Add(c.interval); nextStart.Before(trade.Time); nextStart = nextStart.Add(c.interval) {
-						emptyBar := &Bar{
-							Open:  current.Close,
-							High:  current.Close,
-							Low:   current.Close,
-							Close: current.Close,
-							Start: nextStart,
-						}
-						output <- emptyBar
-					}
+					Open:  trade.Price,
+					High:  trade.Price,
+					Low:   trade.Price,
+					Close: trade.Price,
+					Start: alignedStart,
 				}
 
 				current = newBar
-				continue
+			}
+
+			if current == nil {
+				current = &Bar{
+					Open:  trade.Price,
+					High:  trade.Price,
+					Low:   trade.Price,
+					Start: alignedStart,
+				}
 			}
 
 			// update the current bar
@@ -82,6 +86,7 @@ func (c TimeBarConfig) Process(trades <-chan Trade) chan *Bar {
 			current.Volume = current.Volume.Add(trade.Size)
 		}
 
+		// send the last bar
 		if current != nil {
 			output <- current
 		}

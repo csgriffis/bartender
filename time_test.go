@@ -8,12 +8,12 @@ Licensed under the MIT license. See LICENSE file in the project root for details
 package bartender_test
 
 import (
-	"github.com/csgriffis/bartender"
 	"reflect"
 	"testing"
 	"time"
 
 	decimal "github.com/alpacahq/alpacadecimal"
+	"github.com/csgriffis/bartender"
 )
 
 type TestCase struct {
@@ -24,7 +24,7 @@ type TestCase struct {
 	wantErr  bool
 }
 
-func TestTimeBarGenerator_Process(t *testing.T) {
+func TestTimeBarConfig_Process(t *testing.T) {
 	tests := []TestCase{
 		{
 			name:     "Single Bar",
