@@ -48,7 +48,7 @@ func (c DollarBarConfig) Process(trades <-chan Trade) chan *Bar {
 			current.Volume = current.Volume.Add(trade.Size)
 
 			// increment tracker
-			dollar.Add(trade.Price.Mul(trade.Size))
+			dollar = dollar.Add(trade.Price.Mul(trade.Size))
 
 			if dollar.GreaterThanOrEqual(c.dollarThreshold) {
 				finalizedBar := current

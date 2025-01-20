@@ -8,7 +8,6 @@ Licensed under the MIT license. See LICENSE file in the project root for details
 package bartender_test
 
 import (
-	"reflect"
 	"testing"
 	"time"
 
@@ -16,19 +15,11 @@ import (
 	"github.com/csgriffis/bartender"
 )
 
-type TestCase struct {
-	name     string
-	interval time.Duration
-	trades   []bartender.Trade
-	want     []bartender.Bar
-	wantErr  bool
-}
-
 func TestTimeBarConfig_Process(t *testing.T) {
-	tests := []TestCase{
+	tt := []TestCase[time.Duration]{
 		{
-			name:     "Single Bar",
-			interval: 1 * time.Minute,
+			name:  "Single Bar",
+			input: 1 * time.Minute,
 			trades: []bartender.Trade{
 				{Price: decimal.NewFromInt(100), Size: decimal.NewFromInt(1), Time: time.Date(2025, 1, 1, 10, 0, 0, 0, time.UTC)},
 				{Price: decimal.NewFromInt(101), Size: decimal.NewFromInt(2), Time: time.Date(2025, 1, 1, 10, 0, 30, 0, time.UTC)},
@@ -47,8 +38,8 @@ func TestTimeBarConfig_Process(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name:     "Multiple Bars",
-			interval: 1 * time.Minute,
+			name:  "Multiple Bars",
+			input: 1 * time.Minute,
 			trades: []bartender.Trade{
 				{Price: decimal.NewFromInt(100), Size: decimal.NewFromInt(1), Time: time.Date(2025, 1, 1, 10, 0, 0, 0, time.UTC)},
 				{Price: decimal.NewFromInt(101), Size: decimal.NewFromInt(2), Time: time.Date(2025, 1, 1, 10, 1, 0, 0, time.UTC)},
@@ -83,8 +74,8 @@ func TestTimeBarConfig_Process(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name:     "Missing Trades for interval",
-			interval: 1 * time.Minute,
+			name:  "Missing Trades for interval",
+			input: 1 * time.Minute,
 			trades: []bartender.Trade{
 				{Price: decimal.NewFromInt(100), Size: decimal.NewFromInt(1), Time: time.Date(2025, 1, 1, 10, 0, 0, 0, time.UTC)},
 				{Price: decimal.NewFromInt(101), Size: decimal.NewFromInt(2), Time: time.Date(2025, 1, 1, 10, 1, 0, 0, time.UTC)},
@@ -152,44 +143,21 @@ func TestTimeBarConfig_Process(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name:     "No Trades",
-			interval: 1 * time.Minute,
-			trades:   []bartender.Trade{},
-			want:     []bartender.Bar{},
-			wantErr:  false,
+			name:    "No Trades",
+			input:   1 * time.Minute,
+			trades:  []bartender.Trade{},
+			want:    []bartender.Bar{},
+			wantErr: false,
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			g, err := bartender.New(bartender.WithInterval(tt.interval))
-			if err != nil {
-				t.Errorf("New() error = %v", err)
-				return
-			}
+	for _, tc := range tt {
+		p, err := bartender.New(bartender.WithInterval(tc.input))
+		if err != nil {
+			t.Errorf("New() error = %v", err)
+			return
+		}
 
-			tradesChan := make(chan bartender.Trade)
-			go func() {
-				defer close(tradesChan)
-				for _, trade := range tt.trades {
-					tradesChan <- trade
-				}
-			}()
-
-			barCh, err := bartender.GenerateStream(tradesChan, g)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("GenerateStream() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-
-			barsGot := make([]bartender.Bar, 0, len(tt.trades))
-			for bar := range barCh {
-				barsGot = append(barsGot, bar)
-			}
-
-			if !reflect.DeepEqual(barsGot, tt.want) {
-				t.Errorf("GenerateStream() = %v, want %v", barsGot, tt.want)
-			}
-		})
+		tc.Run(t, p)
 	}
 }

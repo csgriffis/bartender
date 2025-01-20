@@ -135,17 +135,17 @@ func (c VolumeImbalanceBarConfig) Process(trades <-chan Trade) chan *Bar {
 	return output
 }
 
-func WithVolumeRunThreshold(threshold float64) Option[VolumeRunsBarConfig] {
-	return func(v *VolumeRunsBarConfig) {
+func WithVolumeRunThreshold(threshold float64) Option[VolumeRunBarConfig] {
+	return func(v *VolumeRunBarConfig) {
 		v.runVolumeThreshold = decimal.NewFromFloat(threshold)
 	}
 }
 
-type VolumeRunsBarConfig struct {
+type VolumeRunBarConfig struct {
 	runVolumeThreshold decimal.Decimal
 }
 
-func (c VolumeRunsBarConfig) Process(trades <-chan Trade) chan *Bar {
+func (c VolumeRunBarConfig) Process(trades <-chan Trade) chan *Bar {
 	output := make(chan *Bar)
 
 	go func() {
@@ -213,4 +213,4 @@ func (c VolumeRunsBarConfig) Process(trades <-chan Trade) chan *Bar {
 // Interface guards
 var _ Processor = (*VolumeBarConfig)(nil)
 var _ Processor = (*VolumeImbalanceBarConfig)(nil)
-var _ Processor = (*VolumeRunsBarConfig)(nil)
+var _ Processor = (*VolumeRunBarConfig)(nil)

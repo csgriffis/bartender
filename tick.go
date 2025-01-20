@@ -103,7 +103,20 @@ func (c TickImbalanceBarConfig) Process(trades <-chan Trade) chan *Bar {
 			// initialize the previous price if it doesn't exist
 			if prevPrice.IsZero() {
 				prevPrice = trade.Price
+
+				// set first imbalance value based on side of first trade
+				if trade.Side == SideBuy {
+					netImbalance = decimal.NewFromInt(1)
+				} else {
+					netImbalance = decimal.NewFromInt(-1)
+				}
 			}
+
+			// update the current bar
+			current.Close = trade.Price
+			current.High = decimal.Max(current.High, trade.Price)
+			current.Low = decimal.Min(current.Low, trade.Price)
+			current.Volume = current.Volume.Add(trade.Size)
 
 			// update net imbalance
 			if trade.Price.GreaterThan(prevPrice) {
@@ -167,6 +180,12 @@ func (c TickRunsBarConfig) Process(trades <-chan Trade) chan *Bar {
 			if prevPrice.IsZero() {
 				prevPrice = trade.Price
 			}
+
+			// update the current bar
+			current.Close = trade.Price
+			current.High = decimal.Max(current.High, trade.Price)
+			current.Low = decimal.Min(current.Low, trade.Price)
+			current.Volume = current.Volume.Add(trade.Size)
 
 			// determine the direction of the tick and update runs
 			if trade.Price.GreaterThan(prevPrice) {
