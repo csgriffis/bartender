@@ -1,7 +1,7 @@
 # Bartender
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/csgriffis/bartender)](https://goreportcard.com/report/github.com/csgriffis/bartender)
-[![Build Status](https://github.com/csgriffis/bartender/actions/workflows/go.yml/badge.svg)](https://github.com/csgriffis/bartender/actions/workflows/go.yml)
+[![Build Status](https://github.com/csgriffis/bartender/actions/workflows/build.yml/badge.svg)](https://github.com/csgriffis/bartender/actions/workflows/build.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
 [![GoDoc](https://pkg.go.dev/badge/github.com/csgriffis/bartender.svg)](https://pkg.go.dev/github.com/csgriffis/bartender)
 [![Code Coverage](https://img.shields.io/codecov/c/github/csgriffis/bartender)](https://codecov.io/gh/csgriffis/bartender)
