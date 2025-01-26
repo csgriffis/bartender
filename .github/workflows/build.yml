@@ -67,7 +67,8 @@ jobs:
         with:
           allowUpdates: true
           makeLatest: true
-          name: ${{ github.ref_name }}
+          skipIfReleaseExists: true
+          name: ${{ steps.semver.outputs.next }}
           commit: ${{ github.sha }}
           tag: ${{ steps.semver.outputs.next }}
           token: ${{ github.token }}
