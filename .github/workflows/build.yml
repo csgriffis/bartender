@@ -60,7 +60,9 @@ jobs:
           token: ${{ github.token }}
           branch: main
 
-      - uses: cardinalby/git-tag-action@master
-        env:
-          TAG: ${{ steps.semver.outputs.next }}
-          GITHUB_TOKEN: ${{ github.token }}
+      - name: Push tag
+        uses: laputansoft/github-tag-action@v4.6
+        with:
+          default_bump: false
+          github_token: ${{ github.token }}
+          tag: ${{ steps.semver.outputs.next }}
