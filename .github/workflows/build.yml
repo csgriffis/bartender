@@ -51,12 +51,15 @@ jobs:
       - golangci
       - test
     steps:
+      - uses: actions/checkout@v4
+
       - name: Get Next Version
         id: semver
         uses: ietf-tools/semver-action@v1
         with:
           token: ${{ github.token }}
           branch: main
+
       - uses: cardinalby/git-tag-action@master
         env:
           TAG: ${{ steps.semver.outputs.next }}
