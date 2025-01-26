@@ -26,20 +26,6 @@ type Processor interface {
 
 type Option[T any] func(*T)
 
-type Side uint
-
-const (
-	SideBuy Side = iota
-	SideSell
-)
-
-type Trade struct {
-	Price decimal.Decimal
-	Size  decimal.Decimal
-	Side  Side
-	Time  time.Time
-}
-
 type Bar struct {
 	Open   decimal.Decimal
 	High   decimal.Decimal
