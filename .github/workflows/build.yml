@@ -61,8 +61,8 @@ jobs:
         with:
           token: ${{ github.token }}
           branch: main
-          noNewCommitBehavior: 'silent'
-          noVersionBumpBehavior: 'silent'
+          noNewCommitBehavior: 'current'
+          noVersionBumpBehavior: 'current'
 
       - name: Create Release
         uses: ncipollo/release-action@v1.12.0
