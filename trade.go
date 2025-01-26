@@ -21,9 +21,9 @@ const (
 )
 
 type Trade struct {
-	Symnol string
-	Price decimal.Decimal
-	Size  decimal.Decimal
-	Side  Side
-	Time  time.Time
+	Symbol string
+	Price  decimal.Decimal
+	Size   decimal.Decimal
+	Side   Side
+	Time   time.Time
 }
