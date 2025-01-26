@@ -45,8 +45,10 @@ jobs:
           version: v1.63
   # Release job
   release:
-    name: Tag
+    name: Release
     runs-on : ubuntu-latest
+    permissions:
+      contents: write
     needs:
       - golangci
       - test
