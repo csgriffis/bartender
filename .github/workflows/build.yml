@@ -57,12 +57,7 @@ jobs:
         with:
           token: ${{ github.token }}
           branch: main
-
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
-      - name: Tag Repo
-        run: git tag -a v${{ steps.semver.outputs.next_version }} -m "Release v${{ steps.semver.outputs.next_version }}"
-
-      - name: Push Tag
-        run: git push origin v${{ steps.semver.outputs.next_version }}
+      - uses: cardinalby/git-tag-action@master
+        env:
+          TAG: ${{ steps.semver.outputs.next_version }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
