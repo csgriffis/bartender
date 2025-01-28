@@ -9,9 +9,7 @@ package bartender
 
 import (
 	"fmt"
-	"time"
 
-	decimal "github.com/alpacahq/alpacadecimal"
 	"github.com/go-playground/validator/v10"
 )
 
@@ -25,15 +23,6 @@ type Processor interface {
 }
 
 type Option[T any] func(*T)
-
-type Bar struct {
-	Open   decimal.Decimal
-	High   decimal.Decimal
-	Low    decimal.Decimal
-	Close  decimal.Decimal
-	Volume decimal.Decimal
-	Start  time.Time
-}
 
 func New[T Processor](options ...Option[T]) (Processor, error) {
 	var cfg T

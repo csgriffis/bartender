@@ -8,10 +8,11 @@ Licensed under the MIT license. See LICENSE file in the project root for details
 package bartender_test
 
 import (
-	"reflect"
 	"testing"
 
 	"github.com/csgriffis/bartender"
+	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 )
 
 type TestCase[T any] struct {
@@ -44,7 +45,7 @@ func (tc TestCase[T]) Run(t *testing.T, p bartender.Processor) {
 			barsGot = append(barsGot, bar)
 		}
 
-		if !reflect.DeepEqual(barsGot, tc.want) {
+		if diff := cmp.Diff(barsGot, tc.want, cmpopts.IgnoreUnexported(bartender.Bar{})); diff != "" {
 			t.Errorf("GenerateStream() = %v, want %v", barsGot, tc.want)
 		}
 	})

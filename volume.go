@@ -32,20 +32,10 @@ func (c VolumeBarConfig) Process(trades <-chan Trade) chan *Bar {
 		for trade := range trades {
 			// initialize the current bar if it doesn't exist
 			if current == nil {
-				current = &Bar{
-					Open:  trade.Price,
-					High:  trade.Price,
-					Low:   trade.Price,
-					Close: trade.Price,
-					Start: trade.Time,
-				}
+				current = &Bar{}
 			}
 
-			// update the current bar
-			current.Close = trade.Price
-			current.High = decimal.Max(current.High, trade.Price)
-			current.Low = decimal.Min(current.Low, trade.Price)
-			current.Volume = current.Volume.Add(trade.Size)
+			current.applyTrade(trade)
 
 			if current.Volume.GreaterThanOrEqual(c.volumeThreshold) {
 				finalizedBar := current
@@ -92,20 +82,10 @@ func (c VolumeImbalanceBarConfig) Process(trades <-chan Trade) chan *Bar {
 
 			// initialize the current bar if it doesn't exist
 			if current == nil {
-				current = &Bar{
-					Open:  trade.Price,
-					High:  trade.Price,
-					Low:   trade.Price,
-					Close: trade.Price,
-					Start: trade.Time,
-				}
+				current = &Bar{}
 			}
 
-			// update the current bar
-			current.Close = trade.Price
-			current.High = decimal.Max(current.High, trade.Price)
-			current.Low = decimal.Min(current.Low, trade.Price)
-			current.Volume = current.Volume.Add(trade.Size)
+			current.applyTrade(trade)
 
 			// update net imbalance
 			if trade.Price.GreaterThan(prevPrice) {
@@ -163,20 +143,10 @@ func (c VolumeRunBarConfig) Process(trades <-chan Trade) chan *Bar {
 
 			// initialize the current bar if it doesn't exist
 			if current == nil {
-				current = &Bar{
-					Open:  trade.Price,
-					High:  trade.Price,
-					Low:   trade.Price,
-					Close: trade.Price,
-					Start: trade.Time,
-				}
+				current = &Bar{}
 			}
 
-			// update the current bar
-			current.Close = trade.Price
-			current.High = decimal.Max(current.High, trade.Price)
-			current.Low = decimal.Min(current.Low, trade.Price)
-			current.Volume = current.Volume.Add(trade.Size)
+			current.applyTrade(trade)
 
 			// determine the direction of the tick and update volume runs
 			if trade.Price.GreaterThan(prevPrice) {

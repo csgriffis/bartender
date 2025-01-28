@@ -5,6 +5,7 @@ go 1.23.4
 require (
 	github.com/alpacahq/alpacadecimal v0.0.5
 	github.com/go-playground/validator/v10 v10.23.0
+	github.com/google/go-cmp v0.6.0
 )
 
 require (

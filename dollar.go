@@ -32,20 +32,10 @@ func (c DollarBarConfig) Process(trades <-chan Trade) chan *Bar {
 
 		for trade := range trades {
 			if current == nil {
-				current = &Bar{
-					Open:  trade.Price,
-					High:  trade.Price,
-					Low:   trade.Price,
-					Close: trade.Price,
-					Start: trade.Time,
-				}
+				current = &Bar{}
 			}
 
-			// update the current bar
-			current.Close = trade.Price
-			current.High = decimal.Max(current.High, trade.Price)
-			current.Low = decimal.Min(current.Low, trade.Price)
-			current.Volume = current.Volume.Add(trade.Size)
+			current.applyTrade(trade)
 
 			// increment tracker
 			dollar = dollar.Add(trade.Price.Mul(trade.Size))
@@ -96,20 +86,10 @@ func (c DollarImbalanceBarConfig) Process(trades <-chan Trade) chan *Bar {
 			}
 
 			if current == nil {
-				current = &Bar{
-					Open:  trade.Price,
-					High:  trade.Price,
-					Low:   trade.Price,
-					Close: trade.Price,
-					Start: trade.Time,
-				}
+				current = &Bar{}
 			}
 
-			// update the current bar
-			current.Close = trade.Price
-			current.High = decimal.Max(current.High, trade.Price)
-			current.Low = decimal.Min(current.Low, trade.Price)
-			current.Volume = current.Volume.Add(trade.Size)
+			current.applyTrade(trade)
 
 			// update net imbalance
 			if trade.Price.GreaterThan(prevPrice) {
@@ -167,20 +147,10 @@ func (c DollarRunBarConfig) Process(trades <-chan Trade) chan *Bar {
 			}
 
 			if current == nil {
-				current = &Bar{
-					Open:  trade.Price,
-					High:  trade.Price,
-					Low:   trade.Price,
-					Close: trade.Price,
-					Start: trade.Time,
-				}
+				current = &Bar{}
 			}
 
-			// update the current bar
-			current.Close = trade.Price
-			current.High = decimal.Max(current.High, trade.Price)
-			current.Low = decimal.Min(current.Low, trade.Price)
-			current.Volume = current.Volume.Add(trade.Size)
+			current.applyTrade(trade)
 
 			// calculate the dollar value of the trade (Price * Size)
 			tradeDollarValue := trade.Price.Mul(trade.Size)

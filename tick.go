@@ -33,20 +33,10 @@ func (c TickBarConfig) Process(trades <-chan Trade) chan *Bar {
 		for trade := range trades {
 			// initialize the current bar if it doesn't exist
 			if current == nil {
-				current = &Bar{
-					Open:  trade.Price,
-					High:  trade.Price,
-					Low:   trade.Price,
-					Close: trade.Price,
-					Start: trade.Time,
-				}
+				current = &Bar{}
 			}
 
-			// update the current bar
-			current.Close = trade.Price
-			current.High = decimal.Max(current.High, trade.Price)
-			current.Low = decimal.Min(current.Low, trade.Price)
-			current.Volume = current.Volume.Add(trade.Size)
+			current.applyTrade(trade)
 
 			// increment counter
 			tradeCount = tradeCount.Add(decimal.NewFromInt(1))
@@ -91,13 +81,7 @@ func (c TickImbalanceBarConfig) Process(trades <-chan Trade) chan *Bar {
 		for trade := range trades {
 			// initialize the current bar if it doesn't exist
 			if current == nil {
-				current = &Bar{
-					Open:  trade.Price,
-					High:  trade.Price,
-					Low:   trade.Price,
-					Close: trade.Price,
-					Start: trade.Time,
-				}
+				current = &Bar{}
 			}
 
 			// initialize the previous price if it doesn't exist
@@ -112,11 +96,7 @@ func (c TickImbalanceBarConfig) Process(trades <-chan Trade) chan *Bar {
 				}
 			}
 
-			// update the current bar
-			current.Close = trade.Price
-			current.High = decimal.Max(current.High, trade.Price)
-			current.Low = decimal.Min(current.Low, trade.Price)
-			current.Volume = current.Volume.Add(trade.Size)
+			current.applyTrade(trade)
 
 			// update net imbalance
 			if trade.Price.GreaterThan(prevPrice) {
@@ -167,13 +147,7 @@ func (c TickRunsBarConfig) Process(trades <-chan Trade) chan *Bar {
 		for trade := range trades {
 			// initialize the current bar if it doesn't exist
 			if current == nil {
-				current = &Bar{
-					Open:  trade.Price,
-					High:  trade.Price,
-					Low:   trade.Price,
-					Close: trade.Price,
-					Start: trade.Time,
-				}
+				current = &Bar{}
 			}
 
 			// initialize the last price if not already set
@@ -181,11 +155,7 @@ func (c TickRunsBarConfig) Process(trades <-chan Trade) chan *Bar {
 				prevPrice = trade.Price
 			}
 
-			// update the current bar
-			current.Close = trade.Price
-			current.High = decimal.Max(current.High, trade.Price)
-			current.Low = decimal.Min(current.Low, trade.Price)
-			current.Volume = current.Volume.Add(trade.Size)
+			current.applyTrade(trade)
 
 			// determine the direction of the tick and update runs
 			if trade.Price.GreaterThan(prevPrice) {

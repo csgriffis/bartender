@@ -9,8 +9,6 @@ package bartender
 
 import (
 	"time"
-
-	decimal "github.com/alpacahq/alpacadecimal"
 )
 
 func WithInterval(interval time.Duration) Option[TimeBarConfig] {
@@ -79,11 +77,7 @@ func (c TimeBarConfig) Process(trades <-chan Trade) chan *Bar {
 				}
 			}
 
-			// update the current bar
-			current.Close = trade.Price
-			current.High = decimal.Max(current.High, trade.Price)
-			current.Low = decimal.Min(current.Low, trade.Price)
-			current.Volume = current.Volume.Add(trade.Size)
+			current.applyTrade(trade)
 		}
 
 		// send the last bar
