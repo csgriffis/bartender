@@ -8,6 +8,8 @@ Licensed under the MIT license. See LICENSE file in the project root for details
 package bartender
 
 import (
+	"fmt"
+	"strconv"
 	"time"
 
 	decimal "github.com/alpacahq/alpacadecimal"
@@ -79,4 +81,75 @@ func (b *Bar) Ticks() int {
 
 func (b *Bar) Upticks() int {
 	return b.upticks
+}
+
+func (b *Bar) UnmarshalCSV(record []string) error {
+	var err error
+
+	b.Start, err = time.Parse(time.RFC3339Nano, record[0])
+	if err != nil {
+		return fmt.Errorf("failed to parse start time: %w", err)
+	}
+
+	b.Open, err = decimal.NewFromString(record[1])
+	if err != nil {
+		return fmt.Errorf("failed to parse open price: %w", err)
+	}
+
+	b.High, err = decimal.NewFromString(record[2])
+	if err != nil {
+		return fmt.Errorf("failed to parse high price: %w", err)
+	}
+
+	b.Low, err = decimal.NewFromString(record[3])
+	if err != nil {
+		return fmt.Errorf("failed to parse low price: %w", err)
+	}
+
+	b.Close, err = decimal.NewFromString(record[4])
+	if err != nil {
+		return fmt.Errorf("failed to parse close price: %w", err)
+	}
+
+	b.Volume, err = decimal.NewFromString(record[5])
+	if err != nil {
+		return fmt.Errorf("failed to parse volume: %w", err)
+	}
+
+	b.ticks, err = strconv.Atoi(record[6])
+	if err != nil {
+		return fmt.Errorf("failed to parse ticks: %w", err)
+	}
+
+	b.upticks, err = strconv.Atoi(record[7])
+	if err != nil {
+		return fmt.Errorf("failed to parse upticks: %w", err)
+	}
+
+	b.buyVolume, err = decimal.NewFromString(record[8])
+	if err != nil {
+		return fmt.Errorf("failed to parse buy volume: %w", err)
+	}
+
+	b.sellVolume, err = decimal.NewFromString(record[9])
+	if err != nil {
+		return fmt.Errorf("failed to parse sell volume: %w", err)
+	}
+
+	return nil
+}
+
+func (b *Bar) MarshalCSV() ([]string, error) {
+	return []string{
+		b.Start.Format(time.RFC3339Nano),
+		b.Open.StringFixed(2),
+		b.High.StringFixed(2),
+		b.Low.StringFixed(2),
+		b.Close.StringFixed(2),
+		b.Volume.String(),
+		strconv.Itoa(b.ticks),
+		strconv.Itoa(b.upticks),
+		b.buyVolume.String(),
+		b.sellVolume.String(),
+	}, nil
 }
