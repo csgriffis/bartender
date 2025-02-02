@@ -83,6 +83,40 @@ func TestTimeBarConfig_Process(t *testing.T) {
 			wantErr: false,
 		},
 		{
+			name:  "Multiple Bars across days",
+			input: 60 * time.Minute,
+			trades: []bartender.Trade{
+				{Price: decimal.NewFromInt(100), Side: bartender.SideBuy, Size: decimal.NewFromInt(1), Time: time.Date(2025, 1, 1, 23, 45, 0, 0, time.UTC)},
+				{Price: decimal.NewFromInt(101), Side: bartender.SideBuy, Size: decimal.NewFromInt(2), Time: time.Date(2025, 1, 1, 23, 46, 0, 0, time.UTC)},
+				{Price: decimal.NewFromInt(102), Side: bartender.SideBuy, Size: decimal.NewFromInt(3), Time: time.Date(2025, 1, 1, 23, 47, 0, 0, time.UTC)},
+				{Price: decimal.NewFromInt(102), Side: bartender.SideBuy, Size: decimal.NewFromInt(3), Time: time.Date(2025, 1, 2, 0, 2, 0, 0, time.UTC)},
+			},
+			want: []bartender.Bar{
+				{
+					Open:      decimal.NewFromInt(100),
+					High:      decimal.NewFromInt(102),
+					Low:       decimal.NewFromInt(100),
+					Close:     decimal.NewFromInt(102),
+					Volume:    decimal.NewFromInt(6),
+					Start:     time.Date(2025, 1, 1, 23, 00, 0, 0, time.UTC),
+					BuyVolume: decimal.NewFromInt(6),
+					Ticks:     3,
+					Upticks:   2,
+				},
+				{
+					Open:      decimal.NewFromInt(102),
+					High:      decimal.NewFromInt(102),
+					Low:       decimal.NewFromInt(102),
+					Close:     decimal.NewFromInt(102),
+					Volume:    decimal.NewFromInt(3),
+					Start:     time.Date(2025, 1, 2, 0, 00, 0, 0, time.UTC),
+					BuyVolume: decimal.NewFromInt(3),
+					Ticks:     1,
+				},
+			},
+			wantErr: false,
+		},
+		{
 			name:  "Missing Trades for interval",
 			input: 1 * time.Minute,
 			trades: []bartender.Trade{

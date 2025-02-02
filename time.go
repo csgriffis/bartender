@@ -77,6 +77,16 @@ func (c TimeBarConfig) Process(trades <-chan Trade) chan *Bar {
 				}
 			}
 
+			// check if the trade is on a new day
+			if !current.Start.IsZero() && current.Start.Weekday() != trade.Time.Weekday() {
+				finalizedBar := current
+
+				output <- finalizedBar
+
+				// reset the current bar
+				current = &Bar{}
+			}
+
 			current.applyTrade(trade)
 		}
 

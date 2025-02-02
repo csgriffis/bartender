@@ -35,6 +35,16 @@ func (c VolumeBarConfig) Process(trades <-chan Trade) chan *Bar {
 				current = &Bar{}
 			}
 
+			// check if the trade is on a new day
+			if !current.Start.IsZero() && current.Start.Weekday() != trade.Time.Weekday() {
+				finalizedBar := current
+
+				output <- finalizedBar
+
+				// reset the current bar
+				current = &Bar{}
+			}
+
 			current.applyTrade(trade)
 
 			if current.Volume.GreaterThanOrEqual(c.volumeThreshold) {
@@ -83,6 +93,17 @@ func (c VolumeImbalanceBarConfig) Process(trades <-chan Trade) chan *Bar {
 			// initialize the current bar if it doesn't exist
 			if current == nil {
 				current = &Bar{}
+			}
+
+			// check if the trade is on a new day
+			if !current.Start.IsZero() && current.Start.Weekday() != trade.Time.Weekday() {
+				finalizedBar := current
+
+				output <- finalizedBar
+
+				// reset the current bar
+				current = &Bar{}
+				netImbalance = decimal.Zero
 			}
 
 			current.applyTrade(trade)
@@ -144,6 +165,19 @@ func (c VolumeRunBarConfig) Process(trades <-chan Trade) chan *Bar {
 			// initialize the current bar if it doesn't exist
 			if current == nil {
 				current = &Bar{}
+			}
+
+			// check if the trade is on a new day
+			if !current.Start.IsZero() && current.Start.Weekday() != trade.Time.Weekday() {
+				finalizedBar := current
+
+				output <- finalizedBar
+
+				// reset the current bar
+				current = &Bar{}
+				// reset the volume runs
+				upwardVolumeRun = decimal.Zero
+				downwardVolumeRun = decimal.Zero
 			}
 
 			current.applyTrade(trade)

@@ -36,6 +36,17 @@ func (c TickBarConfig) Process(trades <-chan Trade) chan *Bar {
 				current = &Bar{}
 			}
 
+			// check if the trade is on a new day
+			if !current.Start.IsZero() && current.Start.Weekday() != trade.Time.Weekday() {
+				finalizedBar := current
+
+				output <- finalizedBar
+
+				// reset the current bar
+				current = &Bar{}
+				tradeCount = decimal.Zero
+			}
+
 			current.applyTrade(trade)
 
 			// increment counter
@@ -96,6 +107,17 @@ func (c TickImbalanceBarConfig) Process(trades <-chan Trade) chan *Bar {
 				}
 			}
 
+			// check if the trade is on a new day
+			if !current.Start.IsZero() && current.Start.Weekday() != trade.Time.Weekday() {
+				finalizedBar := current
+
+				output <- finalizedBar
+
+				// reset the current bar
+				current = &Bar{}
+				netImbalance = decimal.Zero
+			}
+
 			current.applyTrade(trade)
 
 			// update net imbalance
@@ -153,6 +175,18 @@ func (c TickRunsBarConfig) Process(trades <-chan Trade) chan *Bar {
 			// initialize the last price if not already set
 			if prevPrice.IsZero() {
 				prevPrice = trade.Price
+			}
+
+			// check if the trade is on a new day
+			if !current.Start.IsZero() && current.Start.Weekday() != trade.Time.Weekday() {
+				finalizedBar := current
+
+				output <- finalizedBar
+
+				// reset the current bar
+				current = &Bar{}
+				upwardRun = decimal.Zero
+				downwardRun = decimal.Zero
 			}
 
 			current.applyTrade(trade)

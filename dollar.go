@@ -35,6 +35,18 @@ func (c DollarBarConfig) Process(trades <-chan Trade) chan *Bar {
 				current = &Bar{}
 			}
 
+			// check if the trade is on a new day
+			if !current.Start.IsZero() && current.Start.Weekday() != trade.Time.Weekday() {
+				finalizedBar := current
+
+				output <- finalizedBar
+
+				// reset the current bar
+				current = &Bar{}
+				// reset the dollar tracker
+				dollar = decimal.Zero
+			}
+
 			current.applyTrade(trade)
 
 			// increment tracker
@@ -87,6 +99,18 @@ func (c DollarImbalanceBarConfig) Process(trades <-chan Trade) chan *Bar {
 
 			if current == nil {
 				current = &Bar{}
+			}
+
+			// check if the trade is on a new day
+			if !current.Start.IsZero() && current.Start.Weekday() != trade.Time.Weekday() {
+				finalizedBar := current
+
+				output <- finalizedBar
+
+				// reset the current bar
+				current = &Bar{}
+				// reset the net imbalance
+				netImbalance = decimal.Zero
 			}
 
 			current.applyTrade(trade)
@@ -148,6 +172,20 @@ func (c DollarRunBarConfig) Process(trades <-chan Trade) chan *Bar {
 
 			if current == nil {
 				current = &Bar{}
+			}
+
+			// check if the trade is on a new day
+			if !current.Start.IsZero() && current.Start.Weekday() != trade.Time.Weekday() {
+				finalizedBar := current
+
+				output <- finalizedBar
+
+				// reset the current bar
+				current = &Bar{}
+				// reset the dollar runs
+				upwardDollarRun = decimal.Zero
+				// reset the dollar runs
+				downwardDollarRun = decimal.Zero
 			}
 
 			current.applyTrade(trade)
