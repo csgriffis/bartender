@@ -9,6 +9,7 @@ package bartender
 
 import (
 	"fmt"
+
 	"github.com/go-playground/validator/v10"
 )
 
@@ -57,7 +58,7 @@ func Generate(trades []Trade, processor Processor, filters ...FilterFunc) ([]Bar
 	}()
 
 	// apply the filter to the trades channel
-	filteredTradesStream := any(tradesCh).(<-chan Trade)
+	filteredTradesStream := tradesCh
 	for _, f := range filters {
 		filteredTradesStream = Filter(f)(filteredTradesStream)
 	}
@@ -72,14 +73,14 @@ func Generate(trades []Trade, processor Processor, filters ...FilterFunc) ([]Bar
 }
 
 // GenerateStream processes a channel of trades and returns completed bars on the response channel.
-func GenerateStream(trades <-chan Trade, processor Processor, filters ...FilterFunc) (<-chan Bar, error) {
+func GenerateStream(trades chan Trade, processor Processor, filters ...FilterFunc) (<-chan Bar, error) {
 	if trades == nil {
 		return nil, fmt.Errorf("trades channel is nil")
 	}
 
 	bars := make(chan Bar)
 
-	go func(trades <-chan Trade) {
+	go func(trades chan Trade) {
 		defer close(bars)
 
 		// apply the filter to the trades channel
