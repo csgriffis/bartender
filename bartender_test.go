@@ -46,7 +46,7 @@ func (tc TestCase[T]) Run(t *testing.T, p bartender.Processor) {
 		}
 
 		if diff := cmp.Diff(barsGot, tc.want, cmpopts.IgnoreUnexported(bartender.Bar{})); diff != "" {
-			t.Errorf("GenerateStream() = %v, want %v", barsGot, tc.want)
+			t.Errorf("GenerateStream() = %+v, want %+v", barsGot, tc.want)
 		}
 	})
 }

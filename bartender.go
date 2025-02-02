@@ -42,7 +42,7 @@ func New[T Processor](options ...Option[T]) (Processor, error) {
 
 // Generate processes trades synchronously. It accepts all trades to process and returns all bars generated from
 // the provided trades.
-func Generate(trades []Trade, processor Processor) ([]Bar, error) {
+func Generate(trades []Trade, processor Processor, filters ...FilterFunc) ([]Bar, error) {
 	if len(trades) == 0 {
 		return nil, fmt.Errorf("no trades provided")
 	}
@@ -57,7 +57,13 @@ func Generate(trades []Trade, processor Processor) ([]Bar, error) {
 		}
 	}()
 
-	for bar := range processor.Process(tradesCh) {
+	// apply the filter to the trades channel
+	filteredTradesStream := any(tradesCh).(<-chan Trade)
+	for _, f := range filters {
+		filteredTradesStream = Filter(f)(filteredTradesStream)
+	}
+
+	for bar := range processor.Process(filteredTradesStream) {
 		if bar != nil {
 			bars = append(bars, *bar)
 		}
@@ -67,7 +73,7 @@ func Generate(trades []Trade, processor Processor) ([]Bar, error) {
 }
 
 // GenerateStream processes a channel of trades and returns completed bars on the response channel.
-func GenerateStream(trades <-chan Trade, processor Processor) (<-chan Bar, error) {
+func GenerateStream(trades <-chan Trade, processor Processor, filters ...FilterFunc) (<-chan Bar, error) {
 	if trades == nil {
 		return nil, fmt.Errorf("trades channel is nil")
 	}
@@ -76,7 +82,14 @@ func GenerateStream(trades <-chan Trade, processor Processor) (<-chan Bar, error
 
 	go func(trades <-chan Trade) {
 		defer close(bars)
-		for bar := range processor.Process(trades) {
+
+		// apply the filter to the trades channel
+		filteredTradesStream := trades
+		for _, f := range filters {
+			filteredTradesStream = Filter(f)(filteredTradesStream)
+		}
+
+		for bar := range processor.Process(filteredTradesStream) {
 			if bar != nil {
 				bars <- *bar
 			}

@@ -23,24 +23,25 @@ type Bar struct {
 	Volume decimal.Decimal
 	Start  time.Time
 
-	prevPrice  decimal.Decimal
-	buyVolume  decimal.Decimal
-	sellVolume decimal.Decimal
+	// Intra-bar statistics
+	BuyVolume  decimal.Decimal
+	SellVolume decimal.Decimal
+	Ticks      int
+	Upticks    int
 
-	ticks   int
-	upticks int
+	prevPrice decimal.Decimal
 }
 
 func (b *Bar) applyTrade(t Trade) {
 	// is this the first trade?
-	if b.Open.IsZero() && b.upticks == 0 {
+	if b.Open.IsZero() && b.Upticks == 0 {
 		b.Open = t.Price
 		b.High = t.Price
 		b.Low = t.Price
 	}
 
 	// all trades increment the tick count
-	b.ticks++
+	b.Ticks++
 
 	if b.prevPrice.IsZero() {
 		b.prevPrice = t.Price
@@ -50,37 +51,21 @@ func (b *Bar) applyTrade(t Trade) {
 		b.Start = t.Time
 	}
 
-	// only increment upticks if the price has increased
+	// only increment Upticks if the price has increased
 	if t.Price.GreaterThan(b.prevPrice) {
-		b.upticks++
+		b.Upticks++
 	}
 
 	if t.Side == SideBuy {
-		b.buyVolume = b.buyVolume.Add(t.Size)
+		b.BuyVolume = b.BuyVolume.Add(t.Size)
 	} else {
-		b.sellVolume = b.sellVolume.Add(t.Size)
+		b.SellVolume = b.SellVolume.Add(t.Size)
 	}
 
 	b.Close = t.Price
 	b.High = decimal.Max(b.High, t.Price)
 	b.Low = decimal.Min(b.Low, t.Price)
 	b.Volume = b.Volume.Add(t.Size)
-}
-
-func (b *Bar) BuyVolume() decimal.Decimal {
-	return b.buyVolume
-}
-
-func (b *Bar) SellVolume() decimal.Decimal {
-	return b.sellVolume
-}
-
-func (b *Bar) Ticks() int {
-	return b.ticks
-}
-
-func (b *Bar) Upticks() int {
-	return b.upticks
 }
 
 func (b *Bar) UnmarshalCSV(record []string) error {
@@ -116,22 +101,22 @@ func (b *Bar) UnmarshalCSV(record []string) error {
 		return fmt.Errorf("failed to parse volume: %w", err)
 	}
 
-	b.ticks, err = strconv.Atoi(record[6])
+	b.Ticks, err = strconv.Atoi(record[6])
 	if err != nil {
-		return fmt.Errorf("failed to parse ticks: %w", err)
+		return fmt.Errorf("failed to parse Ticks: %w", err)
 	}
 
-	b.upticks, err = strconv.Atoi(record[7])
+	b.Upticks, err = strconv.Atoi(record[7])
 	if err != nil {
-		return fmt.Errorf("failed to parse upticks: %w", err)
+		return fmt.Errorf("failed to parse Upticks: %w", err)
 	}
 
-	b.buyVolume, err = decimal.NewFromString(record[8])
+	b.BuyVolume, err = decimal.NewFromString(record[8])
 	if err != nil {
 		return fmt.Errorf("failed to parse buy volume: %w", err)
 	}
 
-	b.sellVolume, err = decimal.NewFromString(record[9])
+	b.SellVolume, err = decimal.NewFromString(record[9])
 	if err != nil {
 		return fmt.Errorf("failed to parse sell volume: %w", err)
 	}
@@ -147,9 +132,9 @@ func (b *Bar) MarshalCSV() ([]string, error) {
 		b.Low.StringFixed(2),
 		b.Close.StringFixed(2),
 		b.Volume.String(),
-		strconv.Itoa(b.ticks),
-		strconv.Itoa(b.upticks),
-		b.buyVolume.String(),
-		b.sellVolume.String(),
+		strconv.Itoa(b.Ticks),
+		strconv.Itoa(b.Upticks),
+		b.BuyVolume.String(),
+		b.SellVolume.String(),
 	}, nil
 }
