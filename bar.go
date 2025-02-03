@@ -16,18 +16,18 @@ import (
 )
 
 type Bar struct {
-	Open   decimal.Decimal
-	High   decimal.Decimal
-	Low    decimal.Decimal
-	Close  decimal.Decimal
-	Volume decimal.Decimal
-	Start  time.Time
+	Open   decimal.Decimal `json:"open"`
+	High   decimal.Decimal `json:"high"`
+	Low    decimal.Decimal `json:"low"`
+	Close  decimal.Decimal `json:"close"`
+	Volume decimal.Decimal `json:"volume"`
+	Start  time.Time       `json:"start"`
 
 	// Intra-bar statistics
-	BuyVolume  decimal.Decimal
-	SellVolume decimal.Decimal
-	Ticks      int
-	Upticks    int
+	BuyVolume  decimal.Decimal `json:"buy_volume"`
+	SellVolume decimal.Decimal `json:"sell_volume"`
+	Ticks      int             `json:"ticks"`
+	Upticks    int             `json:"upticks"`
 
 	prevPrice decimal.Decimal
 }

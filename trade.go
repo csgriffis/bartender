@@ -21,9 +21,9 @@ const (
 )
 
 type Trade struct {
-	Symbol string
-	Price  decimal.Decimal
-	Size   decimal.Decimal
-	Side   Side
-	Time   time.Time
+	Symbol string          `json:"symbol"`
+	Price  decimal.Decimal `json:"price"`
+	Size   decimal.Decimal `json:"size"`
+	Side   Side            `json:"side"`
+	Time   time.Time       `json:"time"`
 }
